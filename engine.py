@@ -4,16 +4,16 @@ import tkinter
 
 from world import World
 
-ORIGIN_X = 10
-ORIGIN_Y = 10
-
-CELL_W = 5
-CELL_H = 5
-CELL_PADDING = 1
 
 class Engine:
 
-    def __init__(self, world: World):
+    def __init__(self,
+                 world: World,
+                 origin_x=10, origin_y=10,
+                 grid_colour="lightgrey",
+                 cell_w=5, cell_h=5,
+                 cell_padding=1,
+                 tick_period_ms=300):
         self._root = tkinter.Tk()
         self._root.title("cgl")
         self._root.geometry("500x500")
@@ -21,31 +21,39 @@ class Engine:
         self._canvas = tkinter.Canvas(self._root, width=800, height=800, bg="white")
         self._canvas.pack()
 
-        self.world = world
+        self._world = world
+        self._grid_colour = grid_colour
+
+        self._origin_x = origin_x
+        self._origin_y = origin_y
+        self._cell_width = cell_w
+        self._cell_height = cell_h
+        self._cell_padding = cell_padding
+        self._tick_period_ms = tick_period_ms
 
     def _draw_grid(self):
-        min_x = ORIGIN_X
-        max_x = ORIGIN_X + self.world.x_range*(CELL_W+(CELL_PADDING*2))
-        min_y = ORIGIN_Y
-        max_y = ORIGIN_Y + self.world.y_range*(CELL_H+(CELL_PADDING*2))
+        min_x = self._origin_x
+        max_x = self._origin_x + self._world.x_range*(self._cell_width+(self._cell_padding*2))
+        min_y = self._origin_y
+        max_y = self._origin_y + self._world.y_range*(self._cell_height+(self._cell_padding*2))
 
-        for horizontal in range(self.world.y_range+1):
-            y = horizontal * (CELL_H + (CELL_PADDING*2))
-            self._canvas.create_line(min_x, ORIGIN_Y+y, max_x, ORIGIN_Y+y, fill="black")
+        for horizontal in range(self._world.y_range+1):
+            y = horizontal * (self._cell_height + (self._cell_padding*2))
+            self._canvas.create_line(min_x, self._origin_y+y, max_x, self._origin_y+y, fill=self._grid_colour)
 
-        for vertical in range(self.world.x_range+1):
-            x = vertical * (CELL_W + (CELL_PADDING*2))
-            self._canvas.create_line(ORIGIN_X+x, min_y, ORIGIN_X+x, max_y, fill="black")
+        for vertical in range(self._world.x_range+1):
+            x = vertical * (self._cell_width + (self._cell_padding*2))
+            self._canvas.create_line(self._origin_x+x, min_y, self._origin_x+x, max_y, fill=self._grid_colour)
 
     def _cell_rect(self, cell_x, cell_y):
-        rect_x1 = ORIGIN_X + (cell_x*(CELL_W + (CELL_PADDING*2))) + CELL_PADDING
-        rect_y1 = ORIGIN_Y + (cell_y*(CELL_H + (CELL_PADDING*2))) + CELL_PADDING
-        rect_x2 = ORIGIN_X + (cell_x*(CELL_W + (CELL_PADDING*2))) + CELL_W + CELL_PADDING
-        rect_y2 = ORIGIN_Y + (cell_y*(CELL_H + (CELL_PADDING*2))) + CELL_H + CELL_PADDING
+        rect_x1 = self._origin_x + (cell_x*(self._cell_width + (self._cell_padding*2))) + self._cell_padding
+        rect_y1 = self._origin_y + (cell_y*(self._cell_height + (self._cell_padding*2))) + self._cell_padding
+        rect_x2 = self._origin_x + (cell_x*(self._cell_width + (self._cell_padding*2))) + self._cell_width + self._cell_padding
+        rect_y2 = self._origin_y + (cell_y*(self._cell_height + (self._cell_padding*2))) + self._cell_height + self._cell_padding
         return [rect_x1, rect_y1, rect_x2, rect_y2]
 
     def _draw_cells(self):
-        world_view = self.world.tick()
+        world_view = self._world.tick()
         x_range = len(world_view)
         y_range = len(world_view[0])
 
@@ -58,8 +66,8 @@ class Engine:
         self._canvas.delete(tkinter.ALL)
         self._draw_grid()
         self._draw_cells()
-        self._canvas.after(500, self._animloop)
+        self._canvas.after(self._tick_period_ms, self._animloop)
 
     def run(self):
-        self._canvas.after(500, self._animloop)
+        self._canvas.after(self._tick_period_ms, self._animloop)
         self._root.mainloop()
