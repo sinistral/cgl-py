@@ -16,7 +16,7 @@ class Engine:
                  tick_period_ms=300):
         self._root = tkinter.Tk()
         self._root.title("cgl")
-        self._root.geometry("500x500")
+        self._root.geometry("400x400") # FIX: calculate based on cell dimensions
 
         self._canvas = tkinter.Canvas(self._root, width=800, height=800, bg="white")
         self._canvas.pack()
